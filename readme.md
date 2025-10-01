@@ -1,0 +1,2 @@
+# Broadcom WL
+This is the broadcom-wl driver provided in [here](https://www.broadcom.com/support/download-search?pf=Wireless+LAN+Infrastructure) in repository form so that it can be compiled and versioned. You should respect the terms of the [license](LICENSE).
