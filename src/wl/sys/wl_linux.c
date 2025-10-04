@@ -916,10 +916,6 @@ static struct pci_driver wl_pci_driver __refdata = {
 static int __init
 wl_module_init(void)
 {
-	printk(KERN_WARNING "You are using the broadcom-wl driver, which is not "
-		"maintained and is incompatible with Linux kernel security mitigations. "
-		"It is heavily recommended to replace the hardware and remove the driver. "
-		"Proceed at your own risk!");
 	int error = -ENODEV;
 
 #ifdef BCMDBG
