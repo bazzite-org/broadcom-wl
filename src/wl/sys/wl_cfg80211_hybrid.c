@@ -99,7 +99,9 @@ static s32 wl_cfg80211_set_tx_power(struct wiphy *wiphy,
            enum tx_power_setting type, s32 dbm);
 #endif
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 14, 0)
+static s32 wl_cfg80211_get_tx_power(struct wiphy *wiphy, struct wireless_dev *wdev, u32 /*link_id*/, s32 *dbm);
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)
 static s32 wl_cfg80211_get_tx_power(struct wiphy *wiphy, struct wireless_dev *wdev, s32 *dbm);
 #else
 static s32 wl_cfg80211_get_tx_power(struct wiphy *wiphy, s32 *dbm);
@@ -1152,7 +1154,9 @@ wl_cfg80211_set_tx_power(struct wiphy *wiphy, enum tx_power_setting type, s32 db
 	return err;
 }
 
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(6, 14, 0)
+static s32 wl_cfg80211_get_tx_power(struct wiphy *wiphy, struct wireless_dev *wdev, u32 /*link_id*/, s32 *dbm)
+#elif LINUX_VERSION_CODE >= KERNEL_VERSION(3, 8, 0)
 static s32 wl_cfg80211_get_tx_power(struct wiphy *wiphy, struct wireless_dev *wdev, s32 *dbm)
 #else
 static s32 wl_cfg80211_get_tx_power(struct wiphy *wiphy, s32 *dbm)
