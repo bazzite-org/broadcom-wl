@@ -791,9 +791,9 @@ wl_pci_probe(struct pci_dev *pdev, const struct pci_device_id *ent)
 	pci_read_config_dword(pdev, 0x40, &val);
 	if ((val & 0x0000ff00) != 0)
 		pci_write_config_dword(pdev, 0x40, val & 0xffff00ff);
-		bar1_size = pci_resource_len(pdev, 2);
-		bar1_addr = (uchar *)ioremap(pci_resource_start(pdev, 2),
-			bar1_size);
+	bar1_size = pci_resource_len(pdev, 2);
+	bar1_addr = (uchar *)ioremap(pci_resource_start(pdev, 2),
+		bar1_size);
 	wl = wl_attach(pdev->vendor, pdev->device, pci_resource_start(pdev, 0), PCI_BUS, pdev,
 		pdev->irq, bar1_addr, bar1_size);
 
@@ -1104,8 +1104,9 @@ wl_open(struct net_device *dev)
 	}
 	WL_UNLOCK(wl);
 
-	if (!error)
+	if (!error) {
 		OLD_MOD_INC_USE_COUNT;
+	}
 
 #if defined(USE_CFG80211)
 	if (wl_cfg80211_up(dev)) {
@@ -1495,7 +1496,7 @@ wl_down(wl_info_t *wl)
 		int i = 0;
 		for (i = 0; (atomic_read(&wl->callbacks) > callbacks) && i < 10000; i++) {
 			schedule();
-			flush_scheduled_work();
+			__flush_workqueue(system_wq);
 		}
 	}
 	else
@@ -1859,9 +1860,10 @@ wl_set_mac_address(struct net_device *dev, void *addr)
 	err = wlc_iovar_op(wl->wlc, "cur_etheraddr", NULL, 0, sa->sa_data, ETHER_ADDR_LEN,
 		IOV_SET, (WL_DEV_IF(dev))->wlcif);
 	WL_UNLOCK(wl);
-	if (err)
+	if (err) {
 		WL_ERROR(("wl%d: wl_set_mac_address: error setting MAC addr override\n",
 			wl->pub->unit));
+	}
 	return err;
 }
 
@@ -2248,9 +2250,10 @@ wl_start(struct sk_buff *skb, struct net_device *dev)
 			if (!err) {
 				atomic_inc(&wl->callbacks);
 				wl->txq_dispatched = TRUE;
-			} else
+			} else {
 				WL_ERROR(("wl%d: wl_start/schedule_work failed\n",
 				          wl->pub->unit));
+			}
 		}
 
 		TXQ_UNLOCK(wl);
