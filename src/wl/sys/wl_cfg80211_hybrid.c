@@ -38,6 +38,7 @@
 #include <wlioctl.h>
 #include <proto/802.11.h>
 #include <wl_cfg80211_hybrid.h>
+#include <wl_linux.h>
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 #include <linux/sched/signal.h>
@@ -443,30 +444,7 @@ static void key_endian_to_host(struct wl_wsec_key *key)
 static s32
 wl_dev_ioctl(struct net_device *dev, u32 cmd, void *arg, u32 len)
 {
-	struct ifreq ifr;
-	struct wl_ioctl ioc;
-	mm_segment_t fs;
-	s32 err = 0;
-
-	BUG_ON(len < sizeof(int));
-
-	memset(&ioc, 0, sizeof(ioc));
-	ioc.cmd = cmd;
-	ioc.buf = arg;
-	ioc.len = len;
-	strcpy(ifr.ifr_name, dev->name);
-	ifr.ifr_data = (caddr_t)&ioc;
-
-	fs = get_fs();
-	set_fs(get_ds());
-#if defined(WL_USE_NETDEV_OPS)
-	err = dev->netdev_ops->ndo_do_ioctl(dev, &ifr, SIOCDEVPRIVATE);
-#else
-	err = dev->do_ioctl(dev, &ifr, SIOCDEVPRIVATE);
-#endif
-	set_fs(fs);
-
-	return err;
+	return wlc_ioctl_internal(dev, cmd, arg, len);
 }
 
 static s32

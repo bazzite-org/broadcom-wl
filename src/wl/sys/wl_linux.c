@@ -1647,10 +1647,7 @@ wl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 		goto done2;
 	}
 
-	if (segment_eq(get_fs(), KERNEL_DS))
-		buf = ioc.buf;
-
-	else if (ioc.buf) {
+	if (ioc.buf) {
 		if (!(buf = (void *) MALLOC(wl->osh, MAX(ioc.len, WLC_IOCTL_MAXLEN)))) {
 			bcmerror = BCME_NORESOURCE;
 			goto done2;
@@ -1671,13 +1668,46 @@ wl_ioctl(struct net_device *dev, struct ifreq *ifr, int cmd)
 	WL_UNLOCK(wl);
 
 done1:
-	if (ioc.buf && (ioc.buf != buf)) {
+	if (ioc.buf) {
 		if (copy_to_user(ioc.buf, buf, ioc.len))
 			bcmerror = BCME_BADADDR;
 		MFREE(wl->osh, buf, MAX(ioc.len, WLC_IOCTL_MAXLEN));
 	}
 
 done2:
+	ASSERT(VALID_BCMERROR(bcmerror));
+	if (bcmerror != 0)
+		wl->pub->bcmerror = bcmerror;
+	return (OSL_ERROR(bcmerror));
+}
+
+int
+wlc_ioctl_internal(struct net_device *dev, int cmd, void *buf, int len)
+{
+	wl_info_t *wl;
+	wl_if_t *wlif;
+	int bcmerror;
+
+	if (!dev)
+		return -ENETDOWN;
+
+	wl = WL_INFO(dev);
+	wlif = WL_DEV_IF(dev);
+	if (wlif == NULL || wl == NULL || wl->dev == NULL)
+		return -ENETDOWN;
+
+	bcmerror = 0;
+
+	WL_TRACE(("wl%d: wlc_ioctl_internal: cmd 0x%x\n", wl->pub->unit, cmd));
+
+	WL_LOCK(wl);
+	if (!capable(CAP_NET_ADMIN)) {
+		bcmerror = BCME_EPERM;
+	} else {
+		bcmerror = wlc_ioctl(wl->wlc, cmd, buf, len, wlif->wlcif);
+	}
+	WL_UNLOCK(wl);
+
 	ASSERT(VALID_BCMERROR(bcmerror));
 	if (bcmerror != 0)
 		wl->pub->bcmerror = bcmerror;
