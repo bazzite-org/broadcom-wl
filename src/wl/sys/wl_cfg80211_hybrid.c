@@ -39,6 +39,10 @@
 #include <proto/802.11.h>
 #include <wl_cfg80211_hybrid.h>
 
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#include <linux/sched/signal.h>
+#endif
+
 #define EVENT_TYPE(e) dtoh32((e)->event_type)
 #define EVENT_FLAGS(e) dtoh16((e)->flags)
 #define EVENT_STATUS(e) dtoh32((e)->status)
