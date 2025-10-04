@@ -1457,7 +1457,6 @@ wl_cfg80211_get_station(struct wiphy *wiphy, struct net_device *dev,
 
 	if (memcmp(mac, wl->profile->bssid, ETHER_ADDR_LEN)) {
 		WL_ERR(("Wrong Mac address, mac = %pM   profile =%pM\n", mac, wl->profile->bssid));
-		return -ENOENT;
 	}
 
 	err = wl_dev_ioctl(dev, WLC_GET_RATE, &rate, sizeof(rate));
